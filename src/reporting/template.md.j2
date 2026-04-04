@@ -1,0 +1,85 @@
+# Daily Regime Research Note
+**Date:** {{ date }}
+**Tickers:** {{ tickers | join(", ") }}
+**Data Range:** {{ data_start }} → {{ data_end }}
+
+---
+
+## Executive Summary
+
+{{ executive_summary }}
+
+---
+
+## Current Regime Identification
+
+| Property | Value |
+|---|---|
+| HMM Current Regime | {{ hmm_current_regime }} |
+| Clustering Current Regime | {{ cluster_current_regime }} |
+| Agreement | {{ "✅ Yes" if hmm_current_regime == cluster_current_regime else "❌ No" }} |
+
+---
+
+## Regime Characteristics
+
+### HMM Regimes
+
+| Regime | Ann. Return | Ann. Vol | Sharpe | Max DD | Avg Duration (d) | % Time |
+|--------|-------------|----------|--------|--------|-------------------|--------|
+{% for rid, s in hmm_stats.items() -%}
+| {{ rid }} | {{ "%.2f%%" | format(s.ann_return * 100) }} | {{ "%.2f%%" | format(s.ann_vol * 100) }} | {{ "%.2f" | format(s.sharpe) }} | {{ "%.2f%%" | format(s.max_drawdown * 100) }} | {{ s.avg_duration_days }} | {{ "%.1f%%" | format(s.pct_time * 100) }} |
+{% endfor %}
+
+### Clustering Regimes
+
+| Regime | Ann. Return | Ann. Vol | Sharpe | Max DD | Avg Duration (d) | % Time |
+|--------|-------------|----------|--------|--------|-------------------|--------|
+{% for rid, s in cluster_stats.items() -%}
+| {{ rid }} | {{ "%.2f%%" | format(s.ann_return * 100) }} | {{ "%.2f%%" | format(s.ann_vol * 100) }} | {{ "%.2f" | format(s.sharpe) }} | {{ "%.2f%%" | format(s.max_drawdown * 100) }} | {{ s.avg_duration_days }} | {{ "%.1f%%" | format(s.pct_time * 100) }} |
+{% endfor %}
+
+---
+
+## Transition Probabilities (HMM)
+
+```
+{{ hmm_transition_matrix }}
+```
+
+---
+
+## Model Comparison
+
+| Metric | HMM | Clustering |
+|--------|-----|------------|
+| Total Switches | {{ hmm_stability.total_switches }} | {{ cluster_stability.total_switches }} |
+| Switches / Year | {{ hmm_stability.switches_per_year }} | {{ cluster_stability.switches_per_year }} |
+| Avg Duration (d) | {{ hmm_stability.avg_regime_duration_days }} | {{ cluster_stability.avg_regime_duration_days }} |
+{% if silhouette is defined -%}
+| Silhouette Score | N/A | {{ silhouette }} |
+{% endif %}
+
+---
+
+## Generated Plots
+
+- Regime Timeline: `{{ plot_paths.regime_timeline | default("N/A") }}`
+- Feature Heatmap: `{{ plot_paths.feature_heatmap | default("N/A") }}`
+- Regime Performance: `{{ plot_paths.regime_performance | default("N/A") }}`
+- Transition Matrix: `{{ plot_paths.transition_matrix | default("N/A") }}`
+- Model Comparison: `{{ plot_paths.model_comparison | default("N/A") }}`
+
+---
+
+## Limitations & Caveats
+
+- Regime labels are arbitrary (not ordered bull/bear); interpretation is based on observed statistics.
+- HMM assumes Gaussian emissions and first-order Markov transitions — real markets are more complex.
+- Clustering methods do not model temporal ordering; only feature-space proximity is used.
+- Feature warm-up windows cause the first ~63 trading days to be dropped.
+- Results depend on the selected number of regimes ({{ n_regimes }}).
+
+---
+
+*Generated automatically by sp_ai_agent on {{ date }}.*

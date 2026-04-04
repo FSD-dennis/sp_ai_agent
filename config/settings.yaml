@@ -1,0 +1,73 @@
+# ──────────────────────────────────────────────
+# S&P 500 Regime Detection Agent – Configuration
+# ──────────────────────────────────────────────
+
+seed: 42
+
+# ── Data ──────────────────────────────────────
+data:
+  tickers:
+    - SPY
+    - XLK
+    - XLF
+    - XLE
+    - XLV
+    - XLI
+    - XLC
+    - XLY
+    - XLP
+    - XLB
+    - XLRE
+    - XLU
+  macro_tickers:
+    - TLT
+    - SHY
+  start_date: "2010-01-01"
+  end_date: null  # null = today
+  cache_dir: "outputs/data"
+
+# ── Feature Engineering ───────────────────────
+features:
+  volatility_windows: [5, 21, 63]
+  ewma_span: 21
+  dispersion_zscore_window: 63
+  correlation_window: 63
+  correlation_breakdown_std: 2.0
+  vix_proxy_window: 21
+  volume_shock_window: 21
+  volume_shock_threshold: 2.0
+  amihud_window: 21
+
+# ── Preprocessing ─────────────────────────────
+preprocessing:
+  ffill_limit: 5
+  max_missing_pct: 0.20
+
+# ── Models ────────────────────────────────────
+models:
+  n_regimes: 3
+  hmm:
+    n_iter: 200
+    covariance_type: "full"
+  clustering:
+    method: "both"  # kmeans | gmm | both
+    n_init: 10
+
+# ── Train / Test Split ────────────────────────
+split:
+  train_ratio: 0.70
+  min_train_days: 252
+  walk_forward_step: 63
+
+# ── Agent ─────────────────────────────────────
+agent:
+  model_name: "gpt-4o"
+  temperature: 0.2
+  max_llm_calls: 3
+  max_retries: 1
+
+# ── Outputs ───────────────────────────────────
+outputs:
+  models_dir: "outputs/models"
+  plots_dir: "outputs/plots"
+  reports_dir: "outputs/reports"
